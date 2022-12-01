@@ -1,0 +1,125 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "testapp"
+  namespace: myns
+  labels:
+    app: testapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: testapp
+  template:
+    metadata:
+      namespace: myns
+      labels:
+        app: testapp
+        service: testservice
+      annotations:
+        prometheus_io_scrape: "true"
+        prometheus_io_port: "8080"
+    spec:
+      ## Try to not run in the same availability zone
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                 - key: app
+                   operator: In
+                   values:
+                    - testapp
+              topologyKey: failure-domain.beta.kubernetes.io/zone
+          - weight: 90
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                 - key: app
+                   operator: In
+                   values:
+                    - testapp
+              topologyKey: kubernetes.io/hostname
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      initContainers:
+      - name: init-logging
+        image: busybox
+        command: ['sh', '-c', 'chown 1000:1000 /shared/logs/myapp']
+        securityContext:
+          runAsUser: 0
+        volumeMounts:
+        - name: shared
+          mountPath: "/shared"
+      containers:
+      - name: "myapp"
+        image: myapp
+        resources:
+          limits:
+            cpu: 1
+            memory: 1Gi
+          requests:
+            cpu: 1
+            memory: 500Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        env:
+        - name: RDS_SSL_ENABLE
+          value: true
+        - name: RDS_TRUSTSTORE_PATH
+          value: '{{ rdsTrustStorePath }}'
+        - name: RDS_TRUSTSTORE_PWD_PATH
+          value: '{{ rdsTrustStorePwdPath }}'
+        - name: RDS_TRUSTSTORE_FILE
+          value: '{{ rdsTrustStoreFile }}'
+        - name: RDS_TRUSTSTORE_PWD_FILE
+          value: '{{ rdsTrustStorePwdFile }}'
+        volumeMounts:
+        - name: logs
+          mountPath: "/shared/logs/ft-indexer"
+          readOnly: true
+        - name: dbcredential
+          mountPath: "/home/appuser/opt/webapp/config"
+        ## Mount only if SSL is enabled
+        {%- if service.enable_rds_ssl == "True" %}
+        - name: keystore
+          mountPath: '{{service.rdsTrustStorePath}}'
+        - name: keystorepwd
+          mountPath: '{{service.rdsTrustStorePwdPath}}'
+        {%- endif %}
+      volumes:
+      - name: logs
+        hostPath:
+          path: "/shared/logs/myapp"
+          type: DirectoryOrCreate
+      - name: shared
+        hostPath:
+          path: "/shared"
+      - name: dbcredential
+        secret:
+          secretName: dbcredential
+          defaultMode: 256
+      ## Mount only if SSL is enabled
+      {%- if service.enable_rds_ssl == "True" %}
+      - name: keystorepwd
+        secret:
+          secretName: rds-keystore-cred
+          defaultMode: 256
+      - name: keystore
+        configMap:
+           name: rds-keystore
+      {%- endif %}
