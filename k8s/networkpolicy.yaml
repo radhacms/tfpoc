@@ -1,0 +1,64 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: myapp-netpol
+  namespace: myns
+spec:
+  podSelector:
+    matchLabels:
+      app: "myapp"
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    ports:
+    - protocol: TCP
+      port: 8080
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ service.namespace }}.indexer-egress
+  namespace: {{ service.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      role: "ftincomp--{{ build.components.ftincomp.version|replace(".", "-")  }}--indexer"
+  policyTypes:
+  - Egress
+  egress:
+  - to: #Comunication with RDS
+    - ipBlock:
+        cidr: {{ service.aws.vpc_cidr }}
+    ports:
+    - protocol: TCP
+      port: 3306
+  - to: #Comunitacion with kafka
+    - namespaceSelector: {} #This is because we don't have any label for databus ns
+      podSelector:
+        matchLabels:
+          app: kfk
+          role: kafka--0-0-8--kfk
+    ports:
+    - protocol: TCP
+      port: 9092
+  - to: #Rule for DNS resolution
+    - namespaceSelector: {} #This is because we don't have any label for kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+  - to: #Rule for ETCD connectivity
+    - namespaceSelector: {} #This is because we don't have any label for kube-system
+      podSelector:
+        matchLabels:
+          app: etcd
+    ports:
+    - protocol: TCP
+      port: 2379
