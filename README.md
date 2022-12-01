@@ -47,7 +47,23 @@ terraform destroy
 * we can also use workspace for maintaining different environments.
 * remote state file and dynamodb lock.
 
-# k8s - kubernetes project to create rds mysql client 
+# k8s - kubernetes project to create deployment whioch uses RDS
 
-- Prerequisties - assuming "aws_rds_cluster","aws_rds_cluster_instance", "aws_db_subnet_group" engine is created via terraform.
-- aws_security_group,
+### Prerequisties
+- "aws_rds_cluster"(aurora_cluster),"aws_rds_cluster_instance", "aws_db_subnet_group", "aws_security_group", "aws_db_parameter_group", "aws_rds_cluster_parameter_group", "aws_security_group", engine is created via terraform.
+- Create RDS Database
+- Create DB Security Group
+- Create DB Subnet Group in RDS
+- Create RDS Database
+
+### configure k8s yaml with proper values.
+- external names in k8s/mysql-service-external.yaml
+- k8s/secret.yaml
+- k8s/deployment.yaml
+
+### apply k8s manifests
+- kubectl apply -f k8s
+
+### test by changing service as LoadBalancer type.
+
+
