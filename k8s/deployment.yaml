@@ -42,22 +42,15 @@ spec:
                    values:
                     - testapp
               topologyKey: kubernetes.io/hostname
-      securityContext:
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
-      initContainers:
-      - name: init-logging
-        image: busybox
-        command: ['sh', '-c', 'chown 1000:1000 /shared/logs/myapp']
-        securityContext:
-          runAsUser: 0
-        volumeMounts:
-        - name: shared
-          mountPath: "/shared"
+#      securityContext:
+#        runAsUser: 1000
+#       runAsGroup: 1000
+#       fsGroup: 1000
       containers:
-      - name: "myapp"
+      - name: "nginx"
         image: myapp
+        ports:
+          - containerPort: 80
         resources:
           limits:
             cpu: 1
@@ -67,31 +60,38 @@ spec:
             memory: 500Mi
         livenessProbe:
           httpGet:
-            path: /health
+            path: /
             port: 8080
           initialDelaySeconds: 5
           periodSeconds: 10
         readinessProbe:
           httpGet:
-            path: /health
+            path: /
             port: 8080
           initialDelaySeconds: 5
           periodSeconds: 10
+        env:
+          - name: DB_HOSTNAME
+            value: "mysql"
+          - name: DB_HOSTNAME_RO
+            value: "mysql-ro"
+          - name: DB_PORT
+            value: "3306"            
+          - name: DB_NAME
+            value: "usermgmt"            
+          - name: DB_USERNAME
+            value: "dbadmin"        # RDS DB Username is dbadmin     
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mysql-db-password
+                key: db-password           
         volumeMounts:
         - name: logs
-          mountPath: "/shared/logs/ft-indexer"
+          mountPath: "/shared/logs/myapp"
           readOnly: true
-        - name: dbcredential
-          mountPath: "/home/appuser/opt/webapp/config"
       volumes:
-      - name: logs
+      - name: logs # This is for logstash
         hostPath:
           path: "/shared/logs/myapp"
           type: DirectoryOrCreate
-      - name: shared
-        hostPath:
-          path: "/shared"
-      - name: dbcredential
-        secret:
-          secretName: dbcredential
-          defaultMode: 256
