@@ -77,30 +77,12 @@ spec:
             port: 8080
           initialDelaySeconds: 5
           periodSeconds: 10
-        env:
-        - name: RDS_SSL_ENABLE
-          value: true
-        - name: RDS_TRUSTSTORE_PATH
-          value: '{{ rdsTrustStorePath }}'
-        - name: RDS_TRUSTSTORE_PWD_PATH
-          value: '{{ rdsTrustStorePwdPath }}'
-        - name: RDS_TRUSTSTORE_FILE
-          value: '{{ rdsTrustStoreFile }}'
-        - name: RDS_TRUSTSTORE_PWD_FILE
-          value: '{{ rdsTrustStorePwdFile }}'
         volumeMounts:
         - name: logs
           mountPath: "/shared/logs/ft-indexer"
           readOnly: true
         - name: dbcredential
           mountPath: "/home/appuser/opt/webapp/config"
-        ## Mount only if SSL is enabled
-        {%- if service.enable_rds_ssl == "True" %}
-        - name: keystore
-          mountPath: '{{service.rdsTrustStorePath}}'
-        - name: keystorepwd
-          mountPath: '{{service.rdsTrustStorePwdPath}}'
-        {%- endif %}
       volumes:
       - name: logs
         hostPath:
@@ -113,13 +95,3 @@ spec:
         secret:
           secretName: dbcredential
           defaultMode: 256
-      ## Mount only if SSL is enabled
-      {%- if service.enable_rds_ssl == "True" %}
-      - name: keystorepwd
-        secret:
-          secretName: rds-keystore-cred
-          defaultMode: 256
-      - name: keystore
-        configMap:
-           name: rds-keystore
-      {%- endif %}
