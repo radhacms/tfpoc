@@ -25,12 +25,20 @@ cd $PWD/tf/stages/$ENVIRONMENT/
 - Run terraform commands
 
 ```
+cd $PWD/tf/stages/$ENVIRONMENT/
 terraform init
 terraform plan
 terraform apply --auto-approve
 
 ```
 - Test in browser using public ip of webserver instance
+
+4. To delete created resources
+
+```
+cd $PWD/tf/stages/$ENVIRONMENT/
+terraform destroy
+```
  
 ## TODO ( as best parctice )
 
