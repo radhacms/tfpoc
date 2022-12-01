@@ -1,4 +1,4 @@
-# tfpoc - terraform project to create VPC and WEBSERVER. It contains two module networking , webserver
+# tf - terraform project to create VPC and WEBSERVER. It contains two module networking , webserver
 
 Networking module creates 
 
@@ -30,7 +30,7 @@ terraform plan
 terraform apply --auto-approve
 
 ```
-#TODO ( as best parctice )
+# TODO ( as best parctice )
 
 * dynamic ami id lookup based on region using map and filter function
 * loop ingress using dynamic foreach. currently it is hardcoded
