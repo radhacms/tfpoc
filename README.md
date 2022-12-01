@@ -19,7 +19,7 @@ export ENVIRONMENT=pocenv
 export AWS_ACCESS_KEY_ID=
 export AWS_SECRET_ACCESS_KEY=
 export AWS_DEFAULT_REGION=
-cd $PWD/stages/$ENVIRONMENT/
+cd $PWD/tf/stages/$ENVIRONMENT/
 
 ```
 - Run terraform commands
@@ -38,3 +38,8 @@ terraform apply --auto-approve
 * loop ingress using dynamic foreach. currently it is hardcoded
 * we can also use workspace for maintaining different environments.
 * remote state file and dynamodb lock.
+
+# k8s - kubernetes project to create rds mysql client 
+
+- Prerequisties - assuming rds mysql engine is created via terraform.
+- 
