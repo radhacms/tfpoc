@@ -47,7 +47,7 @@ terraform destroy
 * we can also use workspace for maintaining different environments.
 * remote state file and dynamodb lock.
 
-# k8s - kubernetes project to create deployment whioch uses RDS
+# k8s - kubernetes project to create deployment which uses RDS
 
 ### Prerequisties
 - "aws_rds_cluster"(aurora_cluster),"aws_rds_cluster_instance", "aws_db_subnet_group", "aws_security_group", "aws_db_parameter_group", "aws_rds_cluster_parameter_group", "aws_security_group", engine is created via terraform.
