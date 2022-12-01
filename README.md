@@ -50,4 +50,4 @@ terraform destroy
 # k8s - kubernetes project to create rds mysql client 
 
 - Prerequisties - assuming "aws_rds_cluster","aws_rds_cluster_instance", "aws_db_subnet_group" engine is created via terraform.
-- 
+- aws_security_group,
