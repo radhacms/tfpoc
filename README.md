@@ -30,6 +30,8 @@ terraform plan
 terraform apply --auto-approve
 
 ```
+- Test in browser using public ip of webserver instance
+ 
 ## TODO ( as best parctice )
 
 * dynamic ami id lookup based on region using map and filter function
