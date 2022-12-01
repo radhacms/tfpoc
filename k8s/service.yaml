@@ -1,1 +1,15 @@
-
+apiVersion: v1
+kind: Service
+metadata:
+  name: testservice
+  namespace: myns
+  labels:
+    k8s-app: testapp
+    kubernetes.io/cluster-service: "true"
+spec:
+  selector:
+    app: testapp
+  ports:
+  - port: 80
+    targetPort: 8080
+    name: 'testapp'
